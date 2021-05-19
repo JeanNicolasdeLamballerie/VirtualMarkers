@@ -39,13 +39,16 @@
     "moduleResolution": "node",               /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
      "baseUrl": "./",                       /* Base directory to resolve non-absolute module names. */
      "paths": {
-      "@components": ["./src/components"],
-      "@screens":[ "./src/screens"],
-      "@stores": ["./src/stores"],
-      "@utils": ["./src/utils"],
-      "@services": ["./src/services"],
-      "@assets": ["./assets"],
-      "@constants": ["./src/constants"]
+       //"*":["./src/components/*"],
+      "@components*": ["./src/components/*"],
+      "@database*": ["./src/database/*"],
+      "@screens*":[ "./src/screens/*"],
+      "@stores*": ["./src/stores/*"],
+      "@utils*": ["./src/utils/*"],
+      "@services*": ["./src/services/*"],
+      "STYLE*": ["./src/style/*"],
+      "@assets*": ["./assets/*"],
+      "@constants*": ["./src/constants/index"]
     },
     /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     
