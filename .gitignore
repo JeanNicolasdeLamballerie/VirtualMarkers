@@ -2,6 +2,8 @@
 #
 .DS_Store
 
+msbuild.binlog
+
 .vscode
 # Xcode
 #
