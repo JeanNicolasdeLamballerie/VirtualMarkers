@@ -1,15 +1,15 @@
-import {openDatabase, DEBUG, enablePromise} from "react-native-sqlite-storage";
+import {openDatabase, DEBUG, enablePromise} from "react-native-sqlite-2";
 
 //Todo : workflow
 DEBUG(true);
 
-enablePromise(true);
+// enablePromise(true);
 openDatabase({
     name: "TestDatabase",
     location: "default"
-}).then((db) => {
+},(() => {
     console.log("Database loaded");
-});
+}));
 
 // import {promises as fs} from "fs";
 // import { Bookmark } from "../features/bookmark/typesBookmark";

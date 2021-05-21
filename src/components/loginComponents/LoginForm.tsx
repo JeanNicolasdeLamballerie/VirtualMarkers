@@ -7,11 +7,13 @@ import {
     Text,
     useColorScheme,
     View,
-    TextInput
+    TextInput,
+    Button
 } from 'react-native';
-import { Button  } from 'react-native-paper';
+//import { Button  } from 'react-native-paper';
 import {useTheme} from "react-native-paper";
 import {container} from "STYLE/Login";
+import {fnInit} from "../../app/api/User"
 const initialIdentifier = "";
 const initialPassword = "";
 // import '../../app/api/User'
@@ -75,11 +77,16 @@ const LoginForm = () => {
 
             
             <Text>Forgotten password ?</Text>
-
             <Button
+  onPress={() => fnInit()}
+  title="Learn More"
+  color="#841584"
+  accessibilityLabel="Learn more about this purple button"
+/>
+            {/* <Button
             mode={"contained"}
             onPress={() => void console.log('aaaa')}
-            >Enter</Button>
+            >Enter</Button> */}
         </View>
     )
 }

@@ -1,4 +1,4 @@
-import SQLite from "react-native-sqlite-storage";
+import SQLite from "react-native-sqlite-2";
 import { DatabaseInitialization } from "./DatabaseInitialization";
 
 // import { ListItem } from "../types/ListItem";
@@ -21,7 +21,7 @@ export interface Database {
   deleteElements(data:{id:string}, tableName:string): Promise<Boolean>,
 }
 
-let databaseInstance: SQLite.SQLiteDatabase | undefined;
+let databaseInstance: SQLite.SQLiteDB | undefined;
 //const databaseSync: DropboxDatabaseSync = new DropboxDatabaseSync();
 
 type Accumulator = [string[], string[], number]
@@ -65,13 +65,24 @@ export async function create(data: Object, tableName: string): Promise<Boolean> 
 
   const [columns, values, questionMarks]:any[] | [string, string[], string] = Object.entries(data).reduce(reducer, initialAccumulator).map(concatString);
   return getDatabase()
-    .then((db) => db.executeSql(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`, values))
-    .then(([results]) => {
-      const { insertId } = results;
-      console.log(`[db] Added : "`, data, `" ! InsertId: ${insertId}`);
+    .then((db) => new Promise<{insertId:number}>((resolve, reject) => {
+      db.executeSql(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`, values, (_, results) =>{ 
+        resolve(results)
+      }
+    
+      )
+    }
+    ))
+    .then((results) => {
+      if(results?.insertId){
 
-      // Queue database upload
-      return true;
+        const { insertId } = results;
+        console.log(`[db] Added : "`, data, `" ! InsertId: ${insertId}`);
+        
+        // Queue database upload
+        return true;
+      }
+      else return false;
     }
     );
 }
@@ -88,9 +99,12 @@ export async function get(where: string|undefined|null, orderBy: string|undefine
   return getDatabase()
     .then((db) =>
       // Get all the lists, ordered by newest lists first
-      db.executeSql(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`),
+     new Promise<{rows:any}>((resolve, reject) => {
+       db.executeSql(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`, [], (tx, results) => resolve(results))
+
+     })
     )
-    .then(([results]) => {
+    .then((results) => {
       if (results === undefined) {
         return [];
       }
@@ -109,7 +123,7 @@ export async function get(where: string|undefined|null, orderBy: string|undefine
 }
 
 
-export async function update(data:Object, where:{id:string}, tableName:string): Promise<Boolean> {
+export async function update(data:Object, where:{id:string|null|undefined}, tableName:string): Promise<Boolean> {
   if(!data){
     throw new Error(`No data given to perform update`);
   }
@@ -132,9 +146,12 @@ export async function update(data:Object, where:{id:string}, tableName:string): 
   
   return getDatabase()
     .then((db) =>
-      db.executeSql(`UPDATE ${tableName} SET ${setter} WHERE id = ?;`, values),
+    new Promise((resolve, reject) =>
+    {
+      db.executeSql(`UPDATE ${tableName} SET ${setter} WHERE id = ?;`, values, (_, results) => resolve(results))
+    })
     )
-    .then(([results]) => {
+    .then((results) => {
       console.log(`[db] item with id: ${where.id} in ${tableName} updated.`);
       return true;
 
@@ -151,8 +168,13 @@ export async function deleteElements(data:{id:string}, tableName:string): Promis
   return getDatabase()
     .then((db) => {
       // Delete list items first, then delete the list itself
-      db.executeSql(`DELETE FROM ${tableName} WHERE id = ?;`, [data.id]).then(() => db);
+      new Promise((resolve, reject) => {
+        db.executeSql(`DELETE FROM ${tableName} WHERE id = ?;`, [data.id], (_, results) => resolve(results))
+        
+      }) 
+      .then(() => db);
     })
+    //TODO delete associated keys (maybe can be configurated with a waterfall effect on the db ?)
    // .then((db) => db.executeSql("DELETE FROM List WHERE list_id = ?;", [list.id]))
     .then(() => {
       console.log(`[db] Deleted !`);
@@ -164,7 +186,7 @@ export async function deleteElements(data:{id:string}, tableName:string): Promis
 
 // "Private" helpers
 
-async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
+async function getDatabase(): Promise<SQLite.SQLiteDB> {
   if (databaseInstance !== undefined) {
     return Promise.resolve(databaseInstance);
   }
@@ -173,9 +195,9 @@ async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 // Open a connection to the database
-async function open(): Promise<SQLite.SQLiteDatabase> {
-  SQLite.DEBUG(true);
-  SQLite.enablePromise(true);
+async function open(): Promise<SQLite.SQLiteDB> {
+  // SQLite.DEBUG(true);
+  // SQLite.enablePromise(true);
 
   if (databaseInstance) {
     console.log("[db] Database is already open: returning the existing instance");
@@ -191,6 +213,7 @@ async function open(): Promise<SQLite.SQLiteDatabase> {
 
   // Perform any database initialization or updates, if needed
   const databaseInitialization = new DatabaseInitialization();
+  console.log(db)
   await databaseInitialization.updateDatabaseTables(db);
 
   databaseInstance = db;
