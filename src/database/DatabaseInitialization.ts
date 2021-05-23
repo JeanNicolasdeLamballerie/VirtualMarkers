@@ -1,9 +1,10 @@
-import SQLite from "react-native-sqlite-2";
+import SQLite, {DEBUG} from "react-native-sqlite-storage"
 
 export class DatabaseInitialization {
+  
   // Perform any updates to the database schema. These can occur during initial configuration, or after an app store update.
   // This should be called each time the database is opened.
-  public updateDatabaseTables(database: SQLite.SQLiteDB): Promise<void> {
+  public updateDatabaseTables(database: SQLite.SQLiteDatabase): Promise<void> {
     let dbVersion: number = 0;
     function logVersion(tx: SQLite.Transaction, version: any) {
       dbVersion = version;
@@ -25,10 +26,18 @@ export class DatabaseInitialization {
     return new Promise((resolve, reject) => {
       console.log("before")
       database
-      .transaction(this.createTables, async () => {
+      .transaction(this.createTables,(a) => void 0, async () => {
+        console.log('An error has occured, getting db version')
         // Get the current database version
-        const vers = await this.getDatabaseVersion(database);
-        resolve(vers);
+        try{
+
+          const vers = await this.getDatabaseVersion(database);
+          console.log(vers)
+          resolve(vers);
+        }
+        catch(err) {
+          console.log(err)
+        }
       console.log("after")
 
       })
@@ -45,7 +54,8 @@ export class DatabaseInitialization {
 
   // Perform initial setup of the database tables
   private createTables(transaction: SQLite.Transaction) {
-    console.log(transaction, "transaction")
+    DEBUG(true);
+    
     console.log("creating tables...")
     // DANGER! For dev only
     const dropAllTables = false;
@@ -56,15 +66,22 @@ export class DatabaseInitialization {
     }
 
     // List table
+    transaction.executeSql("PRAGMA encoding",[], (s, e:any ) =>  console.log('ENCODING :' ,s, e.rows.item(0)));
+    console.log("creating User table.")
     transaction.executeSql(`
       CREATE TABLE IF NOT EXISTS User(
         id INTEGER PRIMARY KEY NOT NULL,
-        name VARCHAR(20),
-        description TEXT
+        name VARCHAR(40),
+        description TEXT,
+        password TEXT
       );
-    `);
+    `, [], (a, b) => console.log("success :",b), (a, b) => console.log("err :",b));
+
+    console.log("User table created.")
 
     // ListItem table
+    console.log("creating Bookmark table.")
+
     transaction.executeSql(`
       CREATE TABLE IF NOT EXISTS Bookmark(
         id INTEGER PRIMARY KEY NOT NULL,
@@ -75,6 +92,8 @@ export class DatabaseInitialization {
         FOREIGN KEY ( user_id ) REFERENCES User ( id )
       );
     `);
+    console.log("Bookmark table created.")
+
 
     // Version table
     transaction.executeSql(`
@@ -83,20 +102,24 @@ export class DatabaseInitialization {
         version INTEGER
       );
     `);
+    transaction.executeSql(`INSERT INTO User (name, description) VALUES ('Frank', 'Bountiful');`)
+    console.log("Version table created. Table creation function over.")
   }
 
   // Get the version of the database, as specified in the Version table
-  private getDatabaseVersion(database: SQLite.SQLiteDB): Promise<number> {
+  private getDatabaseVersion(database: SQLite.SQLiteDatabase): Promise<number> {
+    console.log("getting db version...")
     // Select the highest version number from the version table
     return new Promise((resolve, reject) => {
-
       database
         .executeSql("SELECT version FROM Version ORDER BY version DESC LIMIT 1;", [],
-          (_, results) => {
-            if (results.rows && results.rows.length > 0) {
+          (results) => {
+            if (results?.rows && results.rows.length > 0) {
               const version = results.rows.item(0).version;
+              console.log("success... Version is : ", version)
               resolve(version);
             } else {
+              console.log("No version defined...")
               resolve(0);
             }
           },

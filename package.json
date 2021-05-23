@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "start": "react-native start",
-    "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "windows": "react-native run-windows"
+    "android": "npx react-native run-android",
+    "ios": "npx react-native run-ios",
+    "start": "npx react-native start",
+    "test": "npx jest",
+    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
+    "windows": "npx react-native run-windows"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.5.1",
@@ -19,7 +19,7 @@
     "react": "17.0.1",
     "react-native": "0.64.0",
     "react-native-paper": "^4.8.1",
-    "react-native-sqlite-2": "^3.3.0",
+    "react-native-sqlite-storage": "git://github.com/tsytsarkin/react-native-sqlite-storage.git#e694dd10ce7e46e0dc9136f1527a93c670bbe874",
     "react-native-vector-icons": "^8.1.0",
     "react-native-windows": "^0.64.0-0",
     "react-redux": "^7.2.3",

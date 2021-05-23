@@ -1,4 +1,4 @@
-import SQLite from "react-native-sqlite-2";
+import SQLite from "react-native-sqlite-storage"
 import { DatabaseInitialization } from "./DatabaseInitialization";
 
 // import { ListItem } from "../types/ListItem";
@@ -21,7 +21,7 @@ export interface Database {
   deleteElements(data:{id:string}, tableName:string): Promise<Boolean>,
 }
 
-let databaseInstance: SQLite.SQLiteDB | undefined;
+let databaseInstance: SQLite.SQLiteDatabase | undefined;
 //const databaseSync: DropboxDatabaseSync = new DropboxDatabaseSync();
 
 type Accumulator = [string[], string[], number]
@@ -37,6 +37,7 @@ type Accumulator = [string[], string[], number]
 //& Returns a Boolean if the operation is successful.
 export async function create(data: Object, tableName: string): Promise<Boolean> {
   //TODO: Needs to be wrapped in an error handler when curried
+  console.log("Starting creation...")
 
   // Initialize a new Accumulator for our reducer function that will hold columns, values, and question marks; 
   // We need those three values to decide where and what to add to the database.
@@ -64,20 +65,27 @@ export async function create(data: Object, tableName: string): Promise<Boolean> 
   const fillQuestionMark = (arr: any[]) => arr.fill('?');
 
   const [columns, values, questionMarks]:any[] | [string, string[], string] = Object.entries(data).reduce(reducer, initialAccumulator).map(concatString);
+  console.log("columns :", columns, "values : ", values, "question marks", questionMarks, "columns, values, questionMarks");
+  console.log(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`)
   return getDatabase()
     .then((db) => new Promise<{insertId:number}>((resolve, reject) => {
-      db.executeSql(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`, values, (_, results) =>{ 
+      db.executeSql(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`, 
+      values.map((e:string) =>  `'${e}'`)
+      ,
+      (results, a) =>{ 
+        console.log("successful creation !", results, a)
         resolve(results)
-      }
+      },(_, err) => console.log("err", err)
     
       )
     }
     ))
     .then((results) => {
+      console.log("results : ", results)
       if(results?.insertId){
 
         const { insertId } = results;
-        console.log(`[db] Added : "`, data, `" ! InsertId: ${insertId}`);
+        console.log(`[db] Added : "`, data, 'as ', values, ` ! InsertId: ${insertId}`);
         
         // Queue database upload
         return true;
@@ -89,7 +97,7 @@ export async function create(data: Object, tableName: string): Promise<Boolean> 
 
 
 
-export async function get(where: string|undefined|null, orderBy: string|undefined|null, tableName: string): Promise<[] | Object[]> {
+export async function get(where: string|undefined|null, orderBy: string|undefined|null, tableName: string): Promise<[] | any[]> {
   //& Following the same pattern as create, we create a getAll function on which we'll do a partial application
 
   //TODO
@@ -100,11 +108,13 @@ export async function get(where: string|undefined|null, orderBy: string|undefine
     .then((db) =>
       // Get all the lists, ordered by newest lists first
      new Promise<{rows:any}>((resolve, reject) => {
-       db.executeSql(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`, [], (tx, results) => resolve(results))
+       console.log(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`)
+       db.executeSql(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`, [], (results) => resolve(results),(tx, err) => console.log(err))
 
      })
     )
     .then((results) => {
+      console.log(results)
       if (results === undefined) {
         return [];
       }
@@ -186,7 +196,7 @@ export async function deleteElements(data:{id:string}, tableName:string): Promis
 
 // "Private" helpers
 
-async function getDatabase(): Promise<SQLite.SQLiteDB> {
+async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (databaseInstance !== undefined) {
     return Promise.resolve(databaseInstance);
   }
@@ -195,7 +205,7 @@ async function getDatabase(): Promise<SQLite.SQLiteDB> {
 }
 
 // Open a connection to the database
-async function open(): Promise<SQLite.SQLiteDB> {
+async function open(): Promise<SQLite.SQLiteDatabase> {
   // SQLite.DEBUG(true);
   // SQLite.enablePromise(true);
 

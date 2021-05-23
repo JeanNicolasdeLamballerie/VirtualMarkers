@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { fetchCount } from './userAPI';
-
+//{id, name, description};
 const initialState = {
   value: 0,
   status: 'idle',

@@ -12,7 +12,7 @@ module.exports = {
           "@database": ["./src/database/"],
           "@screens": ["./src/screens/"],
           "@stores": ["./src/stores/"],
-          "@utils": ["./src/utils/"],
+          "@utils": ["./src/app/utils/"],
           "@services": ["./src/services/"],
           "STYLE": ["./src/style/"],
           "@assets": ["./assets/"],

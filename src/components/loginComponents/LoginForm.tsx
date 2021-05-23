@@ -13,16 +13,17 @@ import {
 //import { Button  } from 'react-native-paper';
 import {useTheme} from "react-native-paper";
 import {container} from "STYLE/Login";
-import {fnInit} from "../../app/api/User"
+import {fnInit, getUsers, User as UserModel} from "../../app/api/User"
 const initialIdentifier = "";
 const initialPassword = "";
+const initialUsers:UserModel[] = [];
 // import '../../app/api/User'
 const LoginForm = () => {
     const theme = useTheme();
     const {classic} = theme.colors;
     const [identifier, setIdentifier] = useState(initialIdentifier)
     const [password, setPassword] = useState(initialPassword)
-    
+    const [users, setUsers] = useState(initialUsers)
     //Login
     interface User {id:string,pw:string};
     const userLogin:User = {id:identifier,pw:password}
@@ -83,10 +84,31 @@ const LoginForm = () => {
   color="#841584"
   accessibilityLabel="Learn more about this purple button"
 />
+<Button
+  onPress={() => getUsers().then(e =>{
+       console.log(e)
+       try {
+
+               setUsers(e)
+       }catch(err){
+           console.log(err)
+       }
+})}
+  title="Anonymous ?"
+  color="#841584"
+  accessibilityLabel="Learn more about this purple button"
+/>
             {/* <Button
             mode={"contained"}
             onPress={() => void console.log('aaaa')}
             >Enter</Button> */}
+        <Text style={{color:'red'}}>{users[0]?.description} {users[0]?.name||'nameholder'} Here !</Text>
+        <Button
+  onPress={() => getUsers().then(e => setUsers(e))}
+  title="Anonymous ?"
+  color="#841584"
+  accessibilityLabel="Learn more about this purple button"
+/>
         </View>
     )
 }

@@ -1,4 +1,4 @@
-import {openDatabase, DEBUG, enablePromise} from "react-native-sqlite-2";
+import {openDatabase, DEBUG, enablePromise} from "react-native-sqlite-storage";
 
 //Todo : workflow
 DEBUG(true);
