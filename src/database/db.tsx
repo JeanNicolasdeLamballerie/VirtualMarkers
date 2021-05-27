@@ -65,23 +65,13 @@ export async function create(data: Object, tableName: string): Promise<Boolean> 
   const fillQuestionMark = (arr: any[]) => arr.fill('?');
 
   const [columns, values, questionMarks]:any[] | [string, string[], string] = Object.entries(data).reduce(reducer, initialAccumulator).map(concatString);
-  console.log("columns :", columns, "values : ", values, "question marks", questionMarks, "columns, values, questionMarks");
-  console.log(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`)
+  // console.log("columns :", columns, "values : ", values, "question marks", questionMarks, "columns, values, questionMarks");
+  // console.log(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`)
   return getDatabase()
-    .then((db) => new Promise<{insertId:number}>((resolve, reject) => {
-      db.executeSql(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`, 
-      values.map((e:string) =>  `'${e}'`)
-      ,
-      (results, a) =>{ 
-        console.log("successful creation !", results, a)
-        resolve(results)
-      },(_, err) => console.log("err", err)
-    
-      )
-    }
-    ))
-    .then((results) => {
-      console.log("results : ", results)
+    .then( (db) =>  db.executeSql(`INSERT INTO ${tableName} (${columns}) VALUES (${questionMarks});`, values.map((e:string) =>  `'${e}'`))
+      ).then(([results]) => {
+        console.log('results : ', results)
+        console.debug("successful creation")
       if(results?.insertId){
 
         const { insertId } = results;
@@ -101,26 +91,21 @@ export async function get(where: string|undefined|null, orderBy: string|undefine
   //& Following the same pattern as create, we create a getAll function on which we'll do a partial application
 
   //TODO
-  //! "where" is not escaped here
+  //! "where" is not protected here
 
   console.log("[db] Fetching from the db...");
   return getDatabase()
-    .then((db) =>
-      // Get all the lists, ordered by newest lists first
-     new Promise<{rows:any}>((resolve, reject) => {
-       console.log(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`)
-       db.executeSql(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`, [], (results) => resolve(results),(tx, err) => console.log(err))
+    .then((db) =>{
+      console.log(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`)
+      return db.executeSql(`SELECT * FROM ${where ? tableName + ' WHERE ' + where : tableName} ${orderBy? orderBy : "ORDER BY id DESC"};`, [])
 
      })
-    )
-    .then((results) => {
-      console.log(results)
+    .then(([results]) => {
       if (results === undefined) {
         return [];
       }
       const count = results.rows.length;
       const items = [];
-      console.log(results);
       for (let i = 0; i < count; i++) {
         const row = results.rows.item(i);
         console.log(row);
@@ -155,13 +140,8 @@ export async function update(data:Object, where:{id:string|null|undefined}, tabl
   const setter:string = set.join(', ');
   
   return getDatabase()
-    .then((db) =>
-    new Promise((resolve, reject) =>
-    {
-      db.executeSql(`UPDATE ${tableName} SET ${setter} WHERE id = ?;`, values, (_, results) => resolve(results))
-    })
-    )
-    .then((results) => {
+    .then((db) => db.executeSql(`UPDATE ${tableName} SET ${setter} WHERE id = ?;`, values))
+    .then((_) => {
       console.log(`[db] item with id: ${where.id} in ${tableName} updated.`);
       return true;
 
@@ -176,14 +156,12 @@ export async function deleteElements(data:{id:string}, tableName:string): Promis
   }
   console.log(`[db] Deleting element with id: ${data.id}`);
   return getDatabase()
-    .then((db) => {
+    .then(async (db) => {
       // Delete list items first, then delete the list itself
-      new Promise((resolve, reject) => {
-        db.executeSql(`DELETE FROM ${tableName} WHERE id = ?;`, [data.id], (_, results) => resolve(results))
-        
-      }) 
-      .then(() => db);
-    })
+       await db.executeSql(`DELETE FROM ${tableName} WHERE id = ?;`, [data.id])
+       return db;
+      })
+
     //TODO delete associated keys (maybe can be configurated with a waterfall effect on the db ?)
    // .then((db) => db.executeSql("DELETE FROM List WHERE list_id = ?;", [list.id]))
     .then(() => {

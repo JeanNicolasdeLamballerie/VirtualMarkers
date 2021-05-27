@@ -7,7 +7,7 @@
  *
  * @format
  */
-
+import {DEBUG, enablePromise} from "react-native-sqlite-storage";
 import React from 'react';
 import {
   SafeAreaView,
@@ -38,6 +38,8 @@ import {DatabaseProvider} from "@database/databaseContext";
 
 import Login from "@screens/Login";
 import { Provider as PaperProvider } from "react-native-paper";
+DEBUG(true);
+enablePromise(true)
 const Section: React.FC<{
   title: string;
 }> = ({ children, title }) => {

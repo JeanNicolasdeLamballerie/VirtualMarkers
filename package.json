@@ -19,7 +19,7 @@
     "react": "17.0.1",
     "react-native": "0.64.0",
     "react-native-paper": "^4.8.1",
-    "react-native-sqlite-storage": "git://github.com/tsytsarkin/react-native-sqlite-storage.git#e694dd10ce7e46e0dc9136f1527a93c670bbe874",
+    "react-native-sqlite-storage": "git://github.com/tsytsarkin/react-native-sqlite-storage.git#f6ddb0fd383ca66a73dfd827cbbfb610728bd9d5",
     "react-native-vector-icons": "^8.1.0",
     "react-native-windows": "^0.64.0-0",
     "react-redux": "^7.2.3",
