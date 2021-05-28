@@ -8,24 +8,21 @@ import {
     useColorScheme,
     View,
   } from 'react-native';
-  import {useTheme} from "react-native-paper";
-  import Log from '@components/Login';
-  import {LoginProps} from "@srcDir/router";
-const {LoginForm} = Log;
-const Login = (props: LoginProps) => {
+  import {useTheme} from "react-native-paper"
+  import {CreateAccountInputs} from '@components/inputComponents/TextInput';
+
+const CreateAccount = () => {
     const theme = useTheme();
     const {classic} = theme.colors;
     
     return (
         <View>
             <SafeAreaView>
-                <ScrollView>
-                    <LoginForm
-                    {...props}
+                    <CreateAccountInputs
+                    validate={(value) => console.log(value)}
                     />
-                </ScrollView>
             </SafeAreaView>
         </View>
     )
 }
-export default Login;
+export default CreateAccount;

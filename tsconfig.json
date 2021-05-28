@@ -48,7 +48,8 @@
       "@services*": ["./src/services/*"],
       "STYLE*": ["./src/style/*"],
       "@assets*": ["./assets/*"],
-      "@constants*": ["./src/constants/index"]
+      "@constants*": ["./src/constants/index"],
+      "@srcDir*" : ["./src/*"]
     },
     /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     

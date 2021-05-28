@@ -17,6 +17,7 @@ module.exports = {
           "STYLE": ["./src/style/"],
           "@assets": ["./assets/"],
           "@constants": ["./src/constants/index"],
+          "@srcDir" : ["./src/"]
         }
       }
     ]

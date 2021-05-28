@@ -38,6 +38,7 @@ import {DatabaseProvider} from "@database/databaseContext";
 
 import Login from "@screens/Login";
 import { Provider as PaperProvider } from "react-native-paper";
+import Router from './src/Router';
 DEBUG(true);
 enablePromise(true)
 const Section: React.FC<{
@@ -77,44 +78,45 @@ const App = () => {
   };
 
   return (
-    <PaperProvider theme={theme}>
-      <DatabaseProvider>
+    <Router/>
+    
+    
+    );
+  };
+  
+  // <PaperProvider theme={theme}>
+  //   <DatabaseProvider>
+  //   <SafeAreaView style={backgroundStyle}>
+  //       {/* <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+  //       <ScrollView
+  //       contentInsetAdjustmentBehavior="automatic"
+  //       style={backgroundStyle}>
+  //       <Header />
+  //       <View
+  //       style={{
+  //         backgroundColor: isDarkMode ? Colors.black : Colors.white,
+  //       }}>
+  //       <Section title="Step One">
+  //       Edit <Text style={styles.highlight}>App.js</Text> to change this
+  //       screen and then come back to see your edits.
+  //     </Section>*/}
+  //           {/* <Login /> */}
 
-      <SafeAreaView style={backgroundStyle}>
-        {/* <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-        style={{
-          backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        }}>
-        <Section title="Step One">
-        Edit <Text style={styles.highlight}>App.js</Text> to change this
-        screen and then come back to see your edits.
-      </Section>*/}
-             <Login />
-
-           {/* <Section title="See Your Changes">
-              <ReloadInstructions />
-              </Section>
-              <Section title="Debug">
-              <DebugInstructions />
-              </Section>
-              <Section title="Learn More">
-              Read the docs to discover what to do next:
-              </Section>
-              <LearnMoreLinks />
-              </View>
-            </ScrollView> */}
-      </SafeAreaView>
-  </DatabaseProvider>
-    </PaperProvider>
-
-  );
-};
-
+  //          {/* <Section title="See Your Changes">
+  //             <ReloadInstructions />
+  //             </Section>
+  //             <Section title="Debug">
+  //             <DebugInstructions />
+  //             </Section>
+  //             <Section title="Learn More">
+  //             Read the docs to discover what to do next:
+  //             </Section>
+  //             <LearnMoreLinks />
+  //             </View>
+  //           </ScrollView> */}
+  //     {/* </SafeAreaView>
+  // </DatabaseProvider>
+  //   </PaperProvider> */}
 const styles = StyleSheet.create({
   sectionContainer: {
     marginTop: 32,

@@ -13,12 +13,17 @@ import {
 //import { Button  } from 'react-native-paper';
 import {useTheme} from "react-native-paper";
 import {container} from "STYLE/Login";
-import {fnInit, getUsers, User as UserModel} from "../../app/api/User"
+import {LoginProps} from "@srcDir/router";
+
+import {fnInit, getUsers, User as UserModel} from "../../app/api/User";
 const initialIdentifier = "";
 const initialPassword = "";
 const initialUsers:UserModel[] = [];
 // import '../../app/api/User'
-const LoginForm = () => {
+
+
+
+const LoginForm = ({navigation, route}: LoginProps) => {
     const theme = useTheme();
     const {classic} = theme.colors;
     const [identifier, setIdentifier] = useState(initialIdentifier)
@@ -38,10 +43,11 @@ const LoginForm = () => {
             cleanup()
         }
     }, [identifier, password])
+    
+    //TODO : post info to db
     const postInfo = (data:User) => false;
-    const onChange = (setState:Function) => (text:string) =>{
-        void setState(text)
-    };
+
+    const onChange = (setState:Function) => (text:string) => void setState(text);
     
     const onChangeIdentifier = onChange(setIdentifier);
     const onChangePassword = onChange(setPassword);
@@ -104,7 +110,9 @@ const LoginForm = () => {
             >Enter</Button> */}
         <Text style={{color:'red'}}>{users[0]?.description} {users[0]?.name||'nameholder'} Here !</Text>
         <Button
-  onPress={() => getUsers().then(e => setUsers(e))}
+ onPress={() =>
+    navigation.navigate('CreateAccount')
+  }
   title="Anonymous ?"
   color="#841584"
   accessibilityLabel="Learn more about this purple button"
